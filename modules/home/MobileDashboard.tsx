@@ -4,7 +4,8 @@ import {
   Fingerprint, ShieldCheck, Timer, Umbrella, Calendar, Heart, 
   ClipboardList, Target, CheckSquare, MapPin, Video, MessageSquare, 
   AlertTriangle, Receipt, Wallet, UserCircle, Files, Database,
-  Users, CalendarClock, BarChart3, Settings, ArrowLeft, Activity
+  Users, CalendarClock, BarChart3, Settings, ArrowLeft, Activity,
+  Trophy, Megaphone, ClipboardCheck
 } from 'lucide-react';
 import { AuthUser, Attendance, Overtime } from '../../types';
 import { presenceService } from '../../services/presenceService';
@@ -74,7 +75,7 @@ const MobileDashboard: React.FC<MobileDashboardProps> = ({ user, setActiveTab })
     { id: 'feedback', label: 'Feedback', icon: MessageSquare, color: 'bg-violet-50 text-violet-600' },
     { id: 'lapor', label: 'Laporan Pelanggaran', icon: AlertTriangle, color: 'bg-red-50 text-red-600' },
     { id: 'document', label: 'Dokumen Digital', icon: Files, color: 'bg-blue-50 text-blue-600' },
-    { id: 'master_menu', label: 'Master', icon: Database, color: 'bg-gray-100 text-gray-700' },
+    { id: 'master_menu', label: 'Dashboard Admin', icon: Database, color: 'bg-gray-100 text-gray-700' },
   ] : [
     { id: 'presence', label: 'Presensi Reguler', icon: Fingerprint, color: 'bg-emerald-50 text-[#006E62]' },
     { id: 'dispensation', label: 'Dispensasi Presensi', icon: ShieldCheck, color: 'bg-blue-50 text-blue-600' },
@@ -93,22 +94,25 @@ const MobileDashboard: React.FC<MobileDashboardProps> = ({ user, setActiveTab })
     { id: 'early_salary', label: 'Ambil Gaji Awal', icon: Wallet, color: 'bg-yellow-50 text-yellow-600' },
     { id: 'reimbursement', label: 'Reimburse', icon: Receipt, color: 'bg-pink-50 text-pink-600' },
     { id: 'document', label: 'Dokumen Digital', icon: Files, color: 'bg-blue-50 text-blue-600' },
-    ...(isAdmin ? [{ id: 'master_menu', label: 'Master', icon: Database, color: 'bg-gray-100 text-gray-700' }] : []),
+    ...(isAdmin ? [{ id: 'master_menu', label: 'Dashboard Admin', icon: Database, color: 'bg-gray-100 text-gray-700' }] : []),
   ];
 
   const adminMenuItems = [
-    { id: 'master_app', label: 'Master Aplikasi', icon: Database, color: 'bg-indigo-50 text-indigo-600' },
-    { id: 'location', label: 'Data Lokasi', icon: MapPin, color: 'bg-emerald-50 text-emerald-600' },
-    { id: 'schedule', label: 'Manajemen Jadwal', icon: CalendarClock, color: 'bg-blue-50 text-blue-600' },
-    { id: 'account', label: 'Manajemen Akun', icon: Users, color: 'bg-purple-50 text-purple-600' },
-    { id: 'salary_scheme', label: 'Skema Gaji', icon: Receipt, color: 'bg-amber-50 text-amber-600' },
-    { id: 'salary_adjustment', label: 'Kustom Gaji', icon: Receipt, color: 'bg-orange-50 text-orange-600' },
-    { id: 'compensation', label: 'Kompensasi', icon: Receipt, color: 'bg-rose-50 text-rose-600' },
-    { id: 'admin_dispensation', label: 'Verif Dispensasi', icon: ShieldCheck, color: 'bg-cyan-50 text-cyan-600' },
     { id: 'daily_monitoring', label: 'Pemantauan Harian', icon: Activity, color: 'bg-rose-50 text-rose-600' },
+    { id: 'admin_dispensation', label: 'Dispensasi sisi admin', icon: ShieldCheck, color: 'bg-cyan-50 text-cyan-600' },
     { id: 'attendance_report', label: 'Laporan Kehadiran', icon: BarChart3, color: 'bg-slate-50 text-slate-600' },
+    { id: 'submission', label: 'Pengajuan', icon: ClipboardCheck, color: 'bg-blue-50 text-blue-600' },
+    { id: 'reimbursement', label: 'Reimburse', icon: Receipt, color: 'bg-pink-50 text-pink-600' },
+    { id: 'early_salary', label: 'Ambil Gaji Awal', icon: Wallet, color: 'bg-yellow-50 text-yellow-600' },
+    { id: 'compensation', label: 'Kompensasi', icon: Receipt, color: 'bg-rose-50 text-rose-600' },
     { id: 'finance_report', label: 'Laporan Finance', icon: Wallet, color: 'bg-green-50 text-green-600' },
-    { id: 'admin_settings', label: 'Pengaturan Admin', icon: Settings, color: 'bg-gray-50 text-gray-600' },
+    { id: 'kpi', label: 'KPI', icon: Target, color: 'bg-purple-50 text-purple-600' },
+    { id: 'key_activity', label: 'Key Activities', icon: CheckSquare, color: 'bg-teal-50 text-teal-600' },
+    { id: 'sales_report', label: 'Sales report', icon: MapPin, color: 'bg-cyan-50 text-cyan-600' },
+    { id: 'feedback', label: 'Feedback Pegawai', icon: MessageSquare, color: 'bg-violet-50 text-violet-600' },
+    { id: 'lapor', label: 'Laporan Pelanggaran', icon: AlertTriangle, color: 'bg-red-50 text-red-600' },
+    { id: 'employee_of_the_period', label: 'Employee of The Month', icon: Trophy, color: 'bg-orange-50 text-orange-600' },
+    { id: 'pengumuman', label: 'Pengumuman', icon: Megaphone, color: 'bg-blue-50 text-blue-600' },
   ];
 
   const activeWorkSession = todayAttendance?.check_in && !todayAttendance.check_out;
@@ -173,7 +177,7 @@ const MobileDashboard: React.FC<MobileDashboardProps> = ({ user, setActiveTab })
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-            {viewMode === 'admin' ? 'Menu Master / Admin' : 'Menu Layanan'}
+            {viewMode === 'admin' ? 'Dashboard Admin' : 'Menu Layanan'}
           </h3>
           {viewMode === 'admin' && (
             <button 

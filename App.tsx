@@ -49,7 +49,7 @@ import { AuthUser } from './types';
 const App: React.FC = () => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'location' | 'account' | 'schedule' | 'document' | 'settings' | 'presence' | 'overtime' | 'submission' | 'leave' | 'annual_leave' | 'permission' | 'maternity_leave' | 'master_app' | 'admin_settings' | 'kpi' | 'key_activity' | 'sales_report' | 'feedback' | 'lapor' | 'rapat' | 'pengumuman' | 'salary_scheme' | 'salary_adjustment' | 'payroll' | 'my_payslip' | 'reimbursement' | 'early_salary' | 'compensation' | 'employee_of_the_period' | 'dispensation' | 'admin_dispensation' | 'attendance_report' | 'finance_report' | 'employee_report' | 'daily_monitoring'>(
-    (window.innerWidth < 768 && authService.getCurrentUser()?.role !== 'admin') 
+    (window.innerWidth < 768) 
       ? 'dashboard' 
       : (authService.getCurrentUser()?.role === 'admin' ? 'master_app' : 'presence')
   );
@@ -271,12 +271,16 @@ const App: React.FC = () => {
             
             <div className="flex items-center gap-3 px-4 py-3 text-gray-400 mt-2">
               <Database size={20} />
-              <span className="font-bold text-[10px] uppercase tracking-widest">Master</span>
+              <span className="font-bold text-[10px] uppercase tracking-widest">{user?.role === 'admin' ? 'Dashboard Admin' : 'Master'}</span>
             </div>
-            <NavItemMobile id="master_app" icon={Database} label="Master Aplikasi" indent />
-            <NavItemMobile id="location" icon={MapPin} label="Data Lokasi" indent />
-            <NavItemMobile id="schedule" icon={CalendarClock} label="Manajemen Jadwal" indent />
-            <NavItemMobile id="account" icon={Users} label="Akun" indent />
+            {user?.role !== 'admin' ? (
+              <>
+                <NavItemMobile id="master_app" icon={Database} label="Master Aplikasi" indent />
+                <NavItemMobile id="location" icon={MapPin} label="Data Lokasi" indent />
+                <NavItemMobile id="schedule" icon={CalendarClock} label="Manajemen Jadwal" indent />
+                <NavItemMobile id="account" icon={Users} label="Akun" indent />
+              </>
+            ) : null}
 
             <div className="mt-4">
               {user?.role !== 'admin' && (
@@ -285,27 +289,29 @@ const App: React.FC = () => {
                   <NavItemMobile id="overtime" icon={Timer} label="Presensi Lembur" />
                 </>
               )}
-              <NavItemMobile id="kpi" icon={Target} label="KPI Performance" />
+              <NavItemMobile id="kpi" icon={Target} label={user?.role === 'admin' ? 'KPI' : 'KPI Performance'} />
               <NavItemMobile id="key_activity" icon={CheckSquare} label="Key Activities" />
-              <NavItemMobile id="employee_of_the_period" icon={Trophy} label="Employee of The Period" />
-              <NavItemMobile id="sales_report" icon={MapPin} label="Sales Report" />
+              <NavItemMobile id="employee_of_the_period" icon={Trophy} label={user?.role === 'admin' ? 'Employee of The Month' : 'Employee of The Period'} />
+              <NavItemMobile id="sales_report" icon={MapPin} label={user?.role === 'admin' ? 'Sales report' : 'Sales Report'} />
               <NavItemMobile id="feedback" icon={ClipboardList} label="Feedback Pegawai" />
-              <NavItemMobile id="lapor" icon={AlertTriangle} label="Lapor Pelanggaran" />
-              <NavItemMobile id="rapat" icon={Video} label="Notulensi Rapat" />
+              <NavItemMobile id="lapor" icon={AlertTriangle} label={user?.role === 'admin' ? 'Laporan Pelanggaran' : 'Lapor Pelanggaran'} />
+              {user?.role !== 'admin' && <NavItemMobile id="rapat" icon={Video} label="Notulensi Rapat" />}
               <NavItemMobile id="pengumuman" icon={Megaphone} label="Pengumuman" />
 
-              <div className="flex items-center gap-3 px-4 py-3 text-gray-400 mt-2">
-                <Receipt size={20} />
-                <span className="font-bold text-[10px] uppercase tracking-widest">Finance</span>
-              </div>
-              <NavItemMobile id="salary_scheme" icon={Receipt} label="Master Skema Gaji" indent />
-              {user?.role === 'admin' && (
+              {user?.role !== 'admin' && (
+                <div className="flex items-center gap-3 px-4 py-3 text-gray-400 mt-2">
+                  <Receipt size={20} />
+                  <span className="font-bold text-[10px] uppercase tracking-widest">Finance</span>
+                </div>
+              )}
+              {user?.role !== 'admin' && <NavItemMobile id="salary_scheme" icon={Receipt} label="Master Skema Gaji" indent />}
+              {user?.role === 'admin' && false && (
                 <NavItemMobile id="salary_adjustment" icon={Receipt} label="Kustom Gaji" indent />
               )}
-              <NavItemMobile id="reimbursement" icon={Receipt} label="Reimburse" indent />
-              <NavItemMobile id="early_salary" icon={Receipt} label="Ambil Gaji Awal" indent />
+              <NavItemMobile id="reimbursement" icon={Receipt} label="Reimburse" indent={user?.role !== 'admin'} />
+              <NavItemMobile id="early_salary" icon={Receipt} label="Ambil Gaji Awal" indent={user?.role !== 'admin'} />
               {user?.role === 'admin' && (
-                <NavItemMobile id="compensation" icon={Receipt} label="Kompensasi" indent />
+                <NavItemMobile id="compensation" icon={Receipt} label="Kompensasi" indent={false} />
               )}
 
               {user?.role !== 'admin' && (
@@ -321,9 +327,12 @@ const App: React.FC = () => {
               {(user?.role === 'admin' || user?.is_hr_admin) && (
                 <NavItemMobile id="daily_monitoring" icon={Activity} label="Pemantauan Harian" />
               )}
+              {user?.role === 'admin' && (
+                <NavItemMobile id="admin_dispensation" icon={ClipboardCheck} label="Dispensasi sisi admin" />
+              )}
               <NavItemMobile id="submission" icon={ClipboardCheck} label="Pengajuan" />
-              <NavItemMobile id="document" icon={Files} label="Dokumen Digital" />
-              <NavItemMobile id="employee_report" icon={BarChart3} label="Laporan Karyawan" />
+              {user?.role !== 'admin' && <NavItemMobile id="document" icon={Files} label="Dokumen Digital" />}
+              {user?.role !== 'admin' && <NavItemMobile id="employee_report" icon={BarChart3} label="Laporan Karyawan" />}
               <NavItemMobile id="attendance_report" icon={BarChart3} label="Laporan Kehadiran" />
               <NavItemMobile id="finance_report" icon={Wallet} label="Laporan Finance" />
               {user?.role !== 'admin' && <NavItemMobile id="settings" icon={Settings} label="Pengaturan" />}
