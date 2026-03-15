@@ -7,6 +7,7 @@ import {
 import { authService } from '../../services/authService';
 import { financeService } from '../../services/financeService';
 import { dispensationService } from '../../services/dispensationService';
+import { LOGO_ICON, Client_Name } from '../../assets';
 import Swal from 'sweetalert2';
 
 interface SidebarProps {
@@ -103,12 +104,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
       <div className="flex items-center justify-between p-4 mb-4">
         {!isCollapsed && (
           <div className="flex items-center gap-2 overflow-hidden">
-            <div className="w-8 h-8 bg-[#006E62] rounded flex items-center justify-center text-white font-bold italic shrink-0">H</div>
-            <h1 className="text-xl font-bold tracking-tight text-[#006E62] truncate">HUREMA</h1>
+            <img src={LOGO_ICON} alt="Logo" className="w-8 h-8 object-contain shrink-0" />
+            <div className="flex flex-col overflow-hidden">
+              <h1 className="text-xl font-bold tracking-tight text-[#006E62] truncate leading-tight">HUREMA</h1>
+              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider truncate">{Client_Name}</p>
+            </div>
           </div>
         )}
         {isCollapsed && (
-          <div className="w-8 h-8 bg-[#006E62] rounded flex items-center justify-center text-white font-bold italic mx-auto">H</div>
+          <img src={LOGO_ICON} alt="Logo" className="w-8 h-8 object-contain mx-auto" />
         )}
       </div>
       
