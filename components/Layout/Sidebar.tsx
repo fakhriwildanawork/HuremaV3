@@ -115,7 +115,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
       <nav className="flex-1 px-3 overflow-y-auto scrollbar-none">
         {user?.role !== 'admin' && <NavItem id="dashboard" icon={LayoutDashboard} label="Beranda" />}
         
-        {/* Master Menu Group */}
+        {/* 1. Master Menu Group */}
         {(user?.role === 'admin' || user?.is_hr_admin) && (
           <div className="mt-4">
             <button 
@@ -134,21 +134,25 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
             
             {(isMasterOpen || isCollapsed) && (
               <div className={`mt-1 overflow-hidden transition-all duration-300 ${isCollapsed ? '' : 'max-h-96'}`}>
-                {user?.role === 'admin' && (
-                  <>
-                    <NavItem id="master_app" icon={Database} label="Master Aplikasi" indent />
-                    <NavItem id="admin_settings" icon={ShieldCheck} label="Pengaturan Admin" indent />
-                  </>
-                )}
+                {user?.role === 'admin' && <NavItem id="master_app" icon={Database} label="Master Aplikasi" indent />}
                 <NavItem id="location" icon={MapPin} label="Data Lokasi" indent />
                 <NavItem id="schedule" icon={CalendarClock} label="Manajemen Jadwal" indent />
                 <NavItem id="account" icon={Users} label="Akun" indent />
+                {user?.role === 'admin' && <NavItem id="admin_settings" icon={ShieldCheck} label="Pengaturan Admin" indent />}
               </div>
             )}
           </div>
         )}
 
-        {/* Performance Menu Group */}
+        {/* 2. Pemantauan Harian */}
+        {(user?.role === 'admin' || user?.is_hr_admin) && (
+          <NavItem id="daily_monitoring" icon={Activity} label="Pemantauan Harian" />
+        )}
+
+        {/* 3. Pengajuan */}
+        <NavItem id="submission" icon={ClipboardCheck} label="Pengajuan" />
+
+        {/* 4. Performance Menu Group */}
         {(user?.role === 'admin' || user?.is_performance_admin) && (
           <div className="mt-4">
             <button 
@@ -175,19 +179,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
           </div>
         )}
 
-        <div className="mt-4">
-          {(user?.role === 'admin' || user?.is_performance_admin) && (
-            <>
-              <NavItem id="employee_of_the_period" icon={Trophy} label="Employee of The Period" />
-              <NavItem id="feedback" icon={ClipboardList} label="Feedback Pegawai" />
-              <NavItem id="lapor" icon={AlertTriangle} label="Lapor Pelanggaran" />
-              <NavItem id="rapat" icon={Video} label="Notulensi Rapat" />
-              <NavItem id="pengumuman" icon={Megaphone} label="Pengumuman" />
-            </>
-          )}
-        </div>
-
-        {/* Finance Menu Group */}
+        {/* 5. Finance Menu Group */}
         {(user?.role === 'admin' || user?.is_finance_admin) && (
           <div className="mt-4">
             <button 
@@ -216,14 +208,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
             
             {(isFinanceOpen || isCollapsed) && (
               <div className={`mt-1 overflow-hidden transition-all duration-300 ${isCollapsed ? '' : 'max-h-96'}`}>
-                <NavItem id="salary_scheme" icon={Receipt} label="Master Skema Gaji" indent />
+                <NavItem id="salary_scheme" icon={Receipt} label="Skema Gaji" indent />
                 {(user?.role === 'admin' || user?.is_finance_admin) && (
                   <>
                     <NavItem id="salary_adjustment" icon={Receipt} label="Kustom Gaji" indent />
                     <NavItem id="payroll" icon={Receipt} label="Payroll" indent />
                   </>
                 )}
-                {user?.role !== 'admin' && <NavItem id="my_payslip" icon={Receipt} label="Slip Gaji Saya" indent />}
                 <NavItem id="reimbursement" icon={Receipt} label="Reimburse" indent badge={(user?.role === 'admin' || user?.is_finance_admin) ? unreadReimbursements : undefined} />
                 <NavItem id="early_salary" icon={Receipt} label="Ambil Gaji Awal" indent />
                 {(user?.role === 'admin' || user?.is_finance_admin) && (
@@ -232,6 +223,21 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
               </div>
             )}
           </div>
+        )}
+
+        <div className="mt-4">
+          <NavItem id="rapat" icon={Video} label="Rapat" />
+          <NavItem id="pengumuman" icon={Megaphone} label="Pengumuman" />
+          <NavItem id="employee_of_the_period" icon={Trophy} label="Employee of The Period" />
+          <NavItem id="feedback" icon={ClipboardList} label="Feedback Pegawai" />
+          <NavItem id="lapor" icon={AlertTriangle} label="Lapor Pelanggaran" />
+        </div>
+
+        <NavItem id="document" icon={Files} label="Dokumen Digital" />
+
+        {/* 12. Antrean Dispensasi */}
+        {(user?.role === 'admin' || user?.is_hr_admin) && (
+          <NavItem id="admin_dispensation" icon={ClipboardList} label="Antrean Dispensasi" badge={unreadDispensations} />
         )}
 
         {/* Laporan Menu Group */}
@@ -267,50 +273,34 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
           </div>
         )}
 
-        {/* Presence & Dispensation Group */}
-        <div className="mt-4">
-          <button 
-            onClick={() => setIsPresenceOpen(!isPresenceOpen)}
-            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-all duration-200 w-full mb-1 text-gray-600 hover:bg-gray-100`}
-            title={isCollapsed ? 'Presensi' : ''}
-          >
-            <div className="relative shrink-0">
-              <Fingerprint size={20} className="text-gray-400" />
-              {unreadDispensations > 0 && isCollapsed && (
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></div>
-              )}
-            </div>
-            {!isCollapsed && (
-              <div className="flex items-center justify-between flex-1 overflow-hidden">
-                <div className="flex items-center gap-2 truncate">
+        {/* Presensi Group for non-admin */}
+        {user?.role !== 'admin' && (
+          <div className="mt-4">
+            <button 
+              onClick={() => setIsPresenceOpen(!isPresenceOpen)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-md transition-all duration-200 w-full mb-1 text-gray-600 hover:bg-gray-100`}
+              title={isCollapsed ? 'Presensi' : ''}
+            >
+              <div className="relative shrink-0">
+                <Fingerprint size={20} className="text-gray-400" />
+              </div>
+              {!isCollapsed && (
+                <div className="flex items-center justify-between flex-1 overflow-hidden">
                   <span className="font-medium text-sm">Presensi</span>
-                  {unreadDispensations > 0 && (
-                    <span className="bg-red-500 text-white text-[8px] font-bold px-1 rounded-full">NEW</span>
-                  )}
+                  {isPresenceOpen ? <ChevronDown size={16} className="text-gray-300" /> : <ChevronRight size={16} className="text-gray-300" />}
                 </div>
-                {isPresenceOpen ? <ChevronDown size={16} className="text-gray-300" /> : <ChevronRight size={16} className="text-gray-300" />}
+              )}
+            </button>
+            
+            {(isPresenceOpen || isCollapsed) && (
+              <div className={`mt-1 overflow-hidden transition-all duration-300 ${isCollapsed ? '' : 'max-h-96'}`}>
+                <NavItem id="presence" icon={Fingerprint} label="Presensi Reguler" indent />
+                <NavItem id="overtime" icon={Timer} label="Presensi Lembur" indent />
+                <NavItem id="dispensation" icon={ClipboardList} label="Dispensasi Presensi" indent />
               </div>
             )}
-          </button>
-          
-          {(isPresenceOpen || isCollapsed) && (
-            <div className={`mt-1 overflow-hidden transition-all duration-300 ${isCollapsed ? '' : 'max-h-96'}`}>
-              {user?.role !== 'admin' && (
-                <>
-                  <NavItem id="presence" icon={Fingerprint} label="Presensi Reguler" indent />
-                  <NavItem id="overtime" icon={Timer} label="Presensi Lembur" indent />
-                  <NavItem id="dispensation" icon={ClipboardList} label="Dispensasi Presensi" indent />
-                </>
-              )}
-              {(user?.role === 'admin' || user?.is_hr_admin) && (
-                <>
-                  <NavItem id="daily_monitoring" icon={Activity} label="Pemantauan Harian" indent />
-                  <NavItem id="admin_dispensation" icon={ClipboardList} label="Antrean Dispensasi" indent badge={unreadDispensations} />
-                </>
-              )}
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="mt-4">
           {user?.role !== 'admin' && (
@@ -321,11 +311,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
               {user?.gender === 'Perempuan' && (
                 <NavItem id="maternity_leave" icon={Heart} label="Cuti Melahirkan" />
               )}
+              <NavItem id="my_payslip" icon={Receipt} label="Slip Gaji Saya" />
+              <NavItem id="settings" icon={Settings} label="Pengaturan" />
             </>
           )}
-          <NavItem id="submission" icon={ClipboardCheck} label="Pengajuan" />
-          <NavItem id="document" icon={Files} label="Dokumen Digital" />
-          {user?.role !== 'admin' && <NavItem id="settings" icon={Settings} label="Pengaturan" />}
         </div>
       </nav>
 
