@@ -171,9 +171,6 @@ const LocationMain: React.FC = () => {
               <ListIcon size={18} />
             </button>
           </div>
-          <button className="p-2 border border-gray-200 rounded-md text-gray-500 hover:bg-gray-50 transition-colors">
-            <Filter size={18} />
-          </button>
           <button 
             onClick={() => { setEditingLocation(null); setShowForm(true); }}
             className="flex items-center gap-2 bg-[#006E62] text-white px-4 py-2 rounded-md hover:bg-[#005a50] transition-colors shadow-sm"

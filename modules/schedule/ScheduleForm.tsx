@@ -78,8 +78,11 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ onClose, onSubmit, initialD
           day_of_week: idx,
           check_in_time: '08:00',
           check_out_time: '17:00',
-          is_holiday: idx === 0 || idx === 6
+          is_holiday: parsedValue === 2 ? false : (idx === 0 || idx === 6)
         }));
+      } else if (name === 'type' && parsedValue === 2) {
+        // Jika pindah ke Tipe 2, pastikan semua is_holiday false
+        newData.rules = prev.rules.map((rule: any) => ({ ...rule, is_holiday: false }));
       }
 
       return newData;
@@ -241,10 +244,12 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ onClose, onSubmit, initialD
                             <span className="text-gray-300">-</span>
                             <input type="time" disabled={formData.rules[idx]?.is_holiday} value={formData.rules[idx]?.check_out_time} onChange={(e) => handleRuleChange(idx, 'check_out_time', e.target.value)} className="flex-1 px-2 py-1 text-xs border rounded disabled:bg-transparent" />
                          </div>
-                         <label className="flex items-center gap-2 cursor-pointer shrink-0">
-                            <input type="checkbox" checked={formData.rules[idx]?.is_holiday} onChange={(e) => handleRuleChange(idx, 'is_holiday', e.target.checked)} className="rounded border-gray-300 text-[#006E62]" />
-                            <span className="text-[10px] font-bold text-gray-400 uppercase">Libur</span>
-                         </label>
+                         {formData.type !== 2 && (
+                           <label className="flex items-center gap-2 cursor-pointer shrink-0">
+                              <input type="checkbox" checked={formData.rules[idx]?.is_holiday} onChange={(e) => handleRuleChange(idx, 'is_holiday', e.target.checked)} className="rounded border-gray-300 text-[#006E62]" />
+                              <span className="text-[10px] font-bold text-gray-400 uppercase">Libur</span>
+                           </label>
+                         )}
                       </div>
                    ))}
                  </div>
