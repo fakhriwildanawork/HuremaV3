@@ -54,7 +54,9 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
       };
 
       if (editingAdmin) {
-        const updatedAdmin = await locationService.updateAdministration(editingAdmin.id, cleanInput);
+        // Pisahkan metadata agar tidak konflik saat update di Supabase
+        const { id: _id, location_id: _locId, created_at: _createdAt, ...updatePayload } = cleanInput;
+        const updatedAdmin = await locationService.updateAdministration(editingAdmin.id, updatePayload);
         setAdministrations(prev => prev.map(a => a.id === updatedAdmin.id ? updatedAdmin : a));
       } else {
         const newAdmin = await locationService.createAdministration({
@@ -135,7 +137,7 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
           {location.image_google_id ? (
             <>
               <img 
-                src={googleDriveService.getFileUrl(location.image_google_id)} 
+                src={googleDriveService.getFileUrl(location.image_google_id).replace('=s1600', '=s0')} 
                 alt={location.name}
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"

@@ -106,6 +106,7 @@ export const locationService = {
       .select();
     
     if (error) throw error;
+    if (!data || data.length === 0) throw new Error('Gagal memperbarui data: Data tidak ditemukan');
     return data[0] as LocationAdministration;
   },
 
