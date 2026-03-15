@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Save, Clock, Calendar, Users, MapPin, Check, ChevronDown } from 'lucide-react';
+import { X, Save, Clock, Calendar, Users, MapPin, Check, ChevronDown, Search } from 'lucide-react';
 import { ScheduleInput, Location, Account } from '../../types';
 import { locationService } from '../../services/locationService';
 import { accountService } from '../../services/accountService';
@@ -27,11 +27,8 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ onClose, onSubmit, initialD
   const [locations, setLocations] = useState<Location[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [activeTab, setActiveTab] = useState<'info' | 'toleransi' | 'rules' | 'locations' | 'exclusions'>('info');
-  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
-  const [showExclusionDropdown, setShowExclusionDropdown] = useState(false);
-
-  const locationRef = useRef<HTMLDivElement>(null);
-  const exclusionRef = useRef<HTMLDivElement>(null);
+  const [locationSearch, setLocationSearch] = useState('');
+  const [exclusionSearch, setExclusionSearch] = useState('');
 
   const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
@@ -49,13 +46,6 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ onClose, onSubmit, initialD
       }));
       setFormData(prev => ({ ...prev, rules: initialRules }));
     }
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (locationRef.current && !locationRef.current.contains(event.target as Node)) setShowLocationDropdown(false);
-      if (exclusionRef.current && !exclusionRef.current.contains(event.target as Node)) setShowExclusionDropdown(false);
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -191,12 +181,27 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ onClose, onSubmit, initialD
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-gray-500 uppercase">Tipe Jadwal</label>
-                <select name="type" value={formData.type} onChange={handleChange} className="w-full px-3 py-2 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-[#006E62] outline-none">
-                  <option value={1}>1. Hari Kerja (Fixed)</option>
-                  <option value={2}>2. Shift Kerja (Uniform)</option>
-                  <option value={3}>3. Libur Khusus (Overriding)</option>
-                  <option value={4}>4. Hari Kerja Khusus</option>
-                </select>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { id: 1, label: '1. Hari Kerja (Fixed)' },
+                    { id: 2, label: '2. Shift Kerja (Uniform)' },
+                    { id: 3, label: '3. Libur Khusus (Overriding)' },
+                    { id: 4, label: '4. Hari Kerja Khusus' }
+                  ].map(type => (
+                    <button
+                      key={type.id}
+                      type="button"
+                      onClick={() => handleChange({ target: { name: 'type', value: type.id.toString() } } as any)}
+                      className={`px-3 py-2 text-[11px] font-bold text-left border rounded transition-all ${
+                        formData.type === type.id 
+                          ? 'bg-emerald-50 border-[#006E62] text-[#006E62]' 
+                          : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'
+                      }`}
+                    >
+                      {type.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {formData.type >= 3 && (
@@ -257,116 +262,130 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ onClose, onSubmit, initialD
           )}
 
           {activeTab === 'locations' && (
-            <div className="animate-in fade-in duration-200">
-               <p className="text-[10px] font-bold text-gray-400 uppercase mb-4">Pilih Lokasi yang Terpengaruh Jadwal Ini</p>
+            <div className="animate-in fade-in duration-200 space-y-4">
+               <p className="text-[10px] font-bold text-gray-400 uppercase">Pilih Lokasi yang Terpengaruh Jadwal Ini</p>
                
-               <div className="relative" ref={locationRef}>
-                  <div 
-                    onClick={() => setShowLocationDropdown(!showLocationDropdown)}
-                    className="w-full px-3 py-2 text-xs border border-gray-200 rounded flex items-center justify-between cursor-pointer bg-white"
-                  >
-                    <span className="text-gray-600 truncate">
-                       {formData.location_ids.length === 0 
-                         ? '-- Pilih Lokasi (Enumlist) --' 
-                         : `${formData.location_ids.length} Lokasi Terpilih`}
-                    </span>
-                    <ChevronDown size={14} className="text-gray-400" />
+               <div className="space-y-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+                    <input 
+                      type="text"
+                      placeholder="Cari Lokasi..."
+                      value={locationSearch}
+                      onChange={(e) => setLocationSearch(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-[#006E62] outline-none"
+                    />
                   </div>
 
-                  {showLocationDropdown && (
-                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-100 rounded shadow-xl max-h-60 overflow-y-auto p-2">
-                       {locations.map(loc => (
+                  <div className="border border-gray-100 rounded-md overflow-hidden bg-gray-50/30">
+                    <div className="max-h-60 overflow-y-auto p-1 space-y-1">
+                       {locations
+                        .filter(loc => loc.name.toLowerCase().includes(locationSearch.toLowerCase()))
+                        .map(loc => (
                           <div 
                             key={loc.id}
                             onClick={() => toggleLocation(loc.id)}
-                            className={`flex items-center gap-2 p-2 rounded cursor-pointer text-xs hover:bg-gray-50 ${
-                              formData.location_ids.includes(loc.id) ? 'bg-emerald-50 text-[#006E62] font-bold' : 'text-gray-600'
+                            className={`flex items-center gap-3 p-2 rounded cursor-pointer text-xs transition-colors ${
+                              formData.location_ids.includes(loc.id) 
+                                ? 'bg-emerald-50 text-[#006E62] font-bold border border-emerald-100' 
+                                : 'text-gray-600 hover:bg-white border border-transparent'
                             }`}
                           >
-                             <div className={`w-4 h-4 border rounded flex items-center justify-center ${
-                               formData.location_ids.includes(loc.id) ? 'bg-[#006E62] border-[#006E62] text-white' : 'border-gray-300'
+                             <div className={`w-4 h-4 border rounded flex items-center justify-center shrink-0 ${
+                               formData.location_ids.includes(loc.id) ? 'bg-[#006E62] border-[#006E62] text-white' : 'border-gray-300 bg-white'
                              }`}>
                                 {formData.location_ids.includes(loc.id) && <Check size={10} />}
                              </div>
-                             {loc.name}
+                             <span className="truncate">{loc.name}</span>
                           </div>
                        ))}
+                       {locations.filter(loc => loc.name.toLowerCase().includes(locationSearch.toLowerCase())).length === 0 && (
+                         <div className="py-8 text-center text-gray-400 italic text-[11px]">Tidak ada lokasi ditemukan.</div>
+                       )}
                     </div>
-                  )}
+                  </div>
                </div>
 
-               <div className="mt-4 flex flex-wrap gap-2">
-                  {formData.location_ids.map((lid: string) => {
-                    const loc = locations.find(l => l.id === lid);
-                    return loc ? (
-                      <span key={lid} className="px-2 py-1 bg-emerald-50 text-[#006E62] text-[10px] font-bold rounded flex items-center gap-1 border border-emerald-100">
-                        {loc.name}
-                        <X size={10} className="cursor-pointer" onClick={() => toggleLocation(lid)} />
-                      </span>
-                    ) : null;
-                  })}
+               <div className="pt-4 border-t border-gray-50">
+                  <p className="text-[9px] font-bold text-gray-400 uppercase mb-2 tracking-widest">{formData.location_ids.length} Lokasi Terpilih</p>
+                  <div className="flex flex-wrap gap-2">
+                    {formData.location_ids.map((lid: string) => {
+                      const loc = locations.find(l => l.id === lid);
+                      return loc ? (
+                        <span key={lid} className="px-2 py-1 bg-emerald-50 text-[#006E62] text-[10px] font-bold rounded flex items-center gap-1 border border-emerald-100">
+                          {loc.name}
+                          <X size={10} className="cursor-pointer" onClick={() => toggleLocation(lid)} />
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
                </div>
             </div>
           )}
 
           {activeTab === 'exclusions' && (
-            <div className="animate-in fade-in duration-200">
-               <div className="bg-blue-50 p-4 border border-blue-100 rounded mb-4">
-                  <p className="text-[10px] text-blue-700 font-medium">Pilih user di bawah untuk MENGECEUALIKAN mereka dari jadwal tipe ini.</p>
+            <div className="animate-in fade-in duration-200 space-y-4">
+               <div className="bg-blue-50 p-3 border border-blue-100 rounded">
+                  <p className="text-[10px] text-blue-700 font-medium italic">Pilih user di bawah untuk MENGECEUALIKAN mereka dari jadwal tipe ini.</p>
                </div>
-               
-               <div className="relative" ref={exclusionRef}>
-                  <div 
-                    onClick={() => setShowExclusionDropdown(!showExclusionDropdown)}
-                    className="w-full px-3 py-2 text-xs border border-gray-200 rounded flex items-center justify-between cursor-pointer bg-white"
-                  >
-                    <span className="text-gray-600 truncate">
-                       {formData.excluded_account_ids.length === 0 
-                         ? '-- Pilih User Dikecualikan (Enumlist) --' 
-                         : `${formData.excluded_account_ids.length} User Terpilih`}
-                    </span>
-                    <ChevronDown size={14} className="text-gray-400" />
+
+               <div className="space-y-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+                    <input 
+                      type="text"
+                      placeholder="Cari Nama Karyawan..."
+                      value={exclusionSearch}
+                      onChange={(e) => setExclusionSearch(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-[#006E62] outline-none"
+                    />
                   </div>
 
-                  {showExclusionDropdown && (
-                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-100 rounded shadow-xl max-h-60 overflow-y-auto p-2">
-                       {filteredAccounts.length === 0 ? (
-                         <p className="text-[10px] text-gray-400 p-2 text-center italic">Tidak ada user tersedia di lokasi terpilih.</p>
-                       ) : (
-                         filteredAccounts.map(acc => (
-                            <div 
-                              key={acc.id}
-                              onClick={() => toggleExclusion(acc.id)}
-                              className={`flex items-center gap-2 p-2 rounded cursor-pointer text-xs hover:bg-gray-50 ${
-                                formData.excluded_account_ids.includes(acc.id) ? 'bg-rose-50 text-rose-600 font-bold' : 'text-gray-600'
-                              }`}
-                            >
-                               <div className={`w-4 h-4 border rounded flex items-center justify-center ${
-                                 formData.excluded_account_ids.includes(acc.id) ? 'bg-rose-500 border-rose-500 text-white' : 'border-gray-300'
-                               }`}>
-                                  {formData.excluded_account_ids.includes(acc.id) && <Check size={10} />}
-                               </div>
-                               <div>
-                                 <p className="leading-tight">{acc.full_name}</p>
-                                 <p className="text-[9px] font-normal opacity-70">{(acc as any).location?.name || 'Tanpa Lokasi'}</p>
-                               </div>
-                            </div>
-                         ))
+                  <div className="border border-gray-100 rounded-md overflow-hidden bg-gray-50/30">
+                    <div className="max-h-60 overflow-y-auto p-1 space-y-1">
+                       {filteredAccounts
+                        .filter(acc => acc.full_name.toLowerCase().includes(exclusionSearch.toLowerCase()))
+                        .map(acc => (
+                          <div 
+                            key={acc.id}
+                            onClick={() => toggleExclusion(acc.id)}
+                            className={`flex items-center gap-3 p-2 rounded cursor-pointer text-xs transition-colors ${
+                              formData.excluded_account_ids.includes(acc.id) 
+                                ? 'bg-rose-50 text-rose-600 font-bold border border-rose-100' 
+                                : 'text-gray-600 hover:bg-white border border-transparent'
+                            }`}
+                          >
+                             <div className={`w-4 h-4 border rounded flex items-center justify-center shrink-0 ${
+                               formData.excluded_account_ids.includes(acc.id) ? 'bg-rose-500 border-rose-500 text-white' : 'border-gray-300 bg-white'
+                             }`}>
+                                {formData.excluded_account_ids.includes(acc.id) && <Check size={10} />}
+                             </div>
+                             <div>
+                               <p className="leading-tight">{acc.full_name}</p>
+                               <p className="text-[9px] font-normal opacity-70">{(acc as any).location?.name || 'Tanpa Lokasi'}</p>
+                             </div>
+                          </div>
+                       ))}
+                       {filteredAccounts.filter(acc => acc.full_name.toLowerCase().includes(exclusionSearch.toLowerCase())).length === 0 && (
+                         <div className="py-8 text-center text-gray-400 italic text-[11px]">Tidak ada karyawan ditemukan.</div>
                        )}
                     </div>
-                  )}
+                  </div>
                </div>
 
-               <div className="mt-4 flex flex-wrap gap-2">
-                  {formData.excluded_account_ids.map((aid: string) => {
-                    const acc = accounts.find(a => a.id === aid);
-                    return acc ? (
-                      <span key={aid} className="px-2 py-1 bg-rose-50 text-rose-600 text-[10px] font-bold rounded flex items-center gap-1 border border-rose-100">
-                        {acc.full_name}
-                        <X size={10} className="cursor-pointer" onClick={() => toggleExclusion(aid)} />
-                      </span>
-                    ) : null;
-                  })}
+               <div className="pt-4 border-t border-gray-50">
+                  <p className="text-[9px] font-bold text-gray-400 uppercase mb-2 tracking-widest">{formData.excluded_account_ids.length} User Dikecualikan</p>
+                  <div className="flex flex-wrap gap-2">
+                    {formData.excluded_account_ids.map((aid: string) => {
+                      const acc = accounts.find(a => a.id === aid);
+                      return acc ? (
+                        <span key={aid} className="px-2 py-1 bg-rose-50 text-rose-600 text-[10px] font-bold rounded flex items-center gap-1 border border-rose-100">
+                          {acc.full_name}
+                          <X size={10} className="cursor-pointer" onClick={() => toggleExclusion(aid)} />
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
                </div>
             </div>
           )}
