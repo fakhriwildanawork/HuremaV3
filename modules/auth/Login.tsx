@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { ShieldCheck, Lock, User, Loader2, AlertCircle } from 'lucide-react';
 import { authService } from '../../services/authService';
 import { AuthUser } from '../../types';
+import { LOGO_ICON, Client_Name } from '../../assets';
 
 interface LoginProps {
   onLoginSuccess: (user: AuthUser) => void;
@@ -41,11 +42,9 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       <div className="w-full max-w-md bg-white rounded-3xl border border-gray-100 shadow-[0_20px_50px_rgba(0,110,98,0.1)] overflow-hidden animate-in fade-in zoom-in duration-500">
         <div className="p-8">
           <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 bg-[#006E62] rounded-2xl flex items-center justify-center text-white font-bold italic text-3xl shadow-xl shadow-[#006E62]/20 mb-4">
-              H
-            </div>
+            <img src={LOGO_ICON} alt="Logo" className="w-16 h-16 object-contain mb-4" />
             <h1 className="text-2xl font-black text-gray-800 tracking-tighter">HUREMA</h1>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">Sistem Manajemen Lokasi</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-1">{Client_Name}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">

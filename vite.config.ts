@@ -26,17 +26,17 @@ export default defineConfig(({ mode }) => {
             display: 'standalone',
             icons: [
               {
-                src: 'https://placehold.co/192x192/006E62/FFFFFF/png?text=H',
+                src: 'https://lh3.googleusercontent.com/d/1-WQrSwQZ_htfcuRau7gB2_WcsaKCxy53',
                 sizes: '192x192',
                 type: 'image/png'
               },
               {
-                src: 'https://placehold.co/512x512/006E62/FFFFFF/png?text=H',
+                src: 'https://lh3.googleusercontent.com/d/1-WQrSwQZ_htfcuRau7gB2_WcsaKCxy53',
                 sizes: '512x512',
                 type: 'image/png'
               },
               {
-                src: 'https://placehold.co/512x512/006E62/FFFFFF/png?text=H',
+                src: 'https://lh3.googleusercontent.com/d/1-WQrSwQZ_htfcuRau7gB2_WcsaKCxy53',
                 sizes: '512x512',
                 type: 'image/png',
                 purpose: 'any maskable'
