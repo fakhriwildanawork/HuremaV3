@@ -53,30 +53,17 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
         due_date: adminInput.due_date === '' ? null : adminInput.due_date
       };
 
-      if (editingAdmin) {
-        // Strict Whitelist: Hanya ambil field yang memang boleh diubah
-        const updatePayload = {
-          admin_date: cleanInput.admin_date,
-          status: cleanInput.status,
-          due_date: cleanInput.due_date,
-          description: cleanInput.description,
-          file_ids: cleanInput.file_ids
-        };
-        const updatedAdmin = await locationService.updateAdministration(editingAdmin.id, updatePayload);
-        setAdministrations(prev => prev.map(a => a.id === updatedAdmin.id ? updatedAdmin : a));
-      } else {
-        const newAdmin = await locationService.createAdministration({
-          ...cleanInput,
-          location_id: id
-        });
-        setAdministrations(prev => [newAdmin, ...prev]);
-      }
+      const newAdmin = await locationService.createAdministration({
+        ...cleanInput,
+        location_id: id
+      });
+      setAdministrations(prev => [newAdmin, ...prev]);
       
       setShowAdminForm(false);
       setEditingAdmin(null);
       Swal.fire({
         title: 'Berhasil!',
-        text: `Data administrasi telah ${editingAdmin ? 'diperbarui' : 'disimpan'}.`,
+        text: 'Data administrasi telah disimpan.',
         icon: 'success',
         timer: 1500,
         showConfirmButton: false
@@ -145,7 +132,6 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
               <img 
                 src={googleDriveService.getFileUrl(location.image_google_id)} 
                 alt={location.name}
-                referrerPolicy="no-referrer"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 flex items-center justify-center transition-all">
@@ -251,15 +237,6 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
               <div key={admin.id} className="bg-white border border-gray-100 rounded-md p-4 shadow-sm hover:shadow-md transition-shadow relative group">
                 <div className="absolute top-4 right-4 flex gap-2">
                   <button 
-                    onClick={() => {
-                      setEditingAdmin(admin);
-                      setShowAdminForm(true);
-                    }}
-                    className="text-gray-300 hover:text-[#006E62] transition-colors"
-                  >
-                    <Edit2 size={14} />
-                  </button>
-                  <button 
                     onClick={() => handleDeleteAdmin(admin.id)}
                     className="text-gray-300 hover:text-red-500 transition-colors"
                   >
@@ -328,7 +305,6 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
           <img 
             src={googleDriveService.getFileUrl(location.image_google_id)} 
             alt={location.name}
-            referrerPolicy="no-referrer"
             className="max-w-full max-h-full object-contain rounded shadow-2xl"
           />
         </div>
