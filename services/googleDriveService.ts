@@ -52,7 +52,7 @@ class GoogleDriveService {
    * Mendapatkan URL gambar publik dari ID File Google Drive.
    */
   getFileUrl(fileId: string): string {
-    return `https://lh3.googleusercontent.com/d/${fileId}=s1600`;
+    return `https://drive.google.com/uc?export=view&id=${fileId}`;
   }
 }
 

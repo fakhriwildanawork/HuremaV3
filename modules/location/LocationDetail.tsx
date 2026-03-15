@@ -54,8 +54,14 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
       };
 
       if (editingAdmin) {
-        // Pisahkan metadata agar tidak konflik saat update di Supabase
-        const { id: _id, location_id: _locId, created_at: _createdAt, ...updatePayload } = cleanInput;
+        // Strict Whitelist: Hanya ambil field yang memang boleh diubah
+        const updatePayload = {
+          admin_date: cleanInput.admin_date,
+          status: cleanInput.status,
+          due_date: cleanInput.due_date,
+          description: cleanInput.description,
+          file_ids: cleanInput.file_ids
+        };
         const updatedAdmin = await locationService.updateAdministration(editingAdmin.id, updatePayload);
         setAdministrations(prev => prev.map(a => a.id === updatedAdmin.id ? updatedAdmin : a));
       } else {
@@ -137,7 +143,7 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
           {location.image_google_id ? (
             <>
               <img 
-                src={googleDriveService.getFileUrl(location.image_google_id).replace('=s1600', '=s0')} 
+                src={googleDriveService.getFileUrl(location.image_google_id)} 
                 alt={location.name}
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -286,7 +292,7 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
                       {admin.file_ids?.map((fid, idx) => (
                         <a 
                           key={idx} 
-                          href={googleDriveService.getFileUrl(fid).replace('=s1600', '=s0')} 
+                          href={googleDriveService.getFileUrl(fid)} 
                           target="_blank" 
                           rel="noreferrer"
                           className="flex items-center gap-1 bg-gray-100 text-[9px] font-bold p-1 rounded hover:bg-gray-200 transition-colors"
@@ -320,7 +326,7 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
             <X size={32} />
           </button>
           <img 
-            src={googleDriveService.getFileUrl(location.image_google_id).replace('=s1600', '=s0')} 
+            src={googleDriveService.getFileUrl(location.image_google_id)} 
             alt={location.name}
             referrerPolicy="no-referrer"
             className="max-w-full max-h-full object-contain rounded shadow-2xl"
