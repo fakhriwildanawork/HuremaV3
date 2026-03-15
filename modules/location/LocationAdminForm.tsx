@@ -6,10 +6,11 @@ import { googleDriveService } from '../../services/googleDriveService';
 interface LocationAdminFormProps {
   onClose: () => void;
   onSubmit: (data: any) => void;
+  initialData?: any;
 }
 
-const LocationAdminForm: React.FC<LocationAdminFormProps> = ({ onClose, onSubmit }) => {
-  const [formData, setFormData] = useState<any>({
+const LocationAdminForm: React.FC<LocationAdminFormProps> = ({ onClose, onSubmit, initialData }) => {
+  const [formData, setFormData] = useState<any>(initialData || {
     admin_date: new Date().toISOString().split('T')[0],
     status: 'Milik Sendiri',
     due_date: '',
@@ -39,7 +40,7 @@ const LocationAdminForm: React.FC<LocationAdminFormProps> = ({ onClose, onSubmit
     if (!files || files.length === 0) return;
 
     setUploading(true);
-    const newFileIds = [...formData.file_ids];
+    const newFileIds = [...(formData.file_ids || [])];
     
     try {
       for (let i = 0; i < files.length; i++) {
@@ -72,7 +73,7 @@ const LocationAdminForm: React.FC<LocationAdminFormProps> = ({ onClose, onSubmit
       <div className="bg-white rounded-md shadow-2xl w-full max-w-lg overflow-hidden flex flex-col animate-in zoom-in duration-200">
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <div>
-            <h3 className="text-base font-bold text-[#006E62]">Tambah Data Administrasi</h3>
+            <h3 className="text-base font-bold text-[#006E62]">{initialData ? 'Edit' : 'Tambah'} Data Administrasi</h3>
             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Legalitas & Status Aset</p>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">

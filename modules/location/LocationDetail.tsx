@@ -21,6 +21,7 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [showAdminForm, setShowAdminForm] = useState(false);
+  const [editingAdmin, setEditingAdmin] = useState<LocationAdministration | null>(null);
   const [showFullImage, setShowFullImage] = useState(false);
 
   useEffect(() => {
@@ -43,7 +44,7 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
     }
   };
 
-  const handleAddAdmin = async (adminInput: any) => {
+  const handleSaveAdmin = async (adminInput: any) => {
     setIsSaving(true);
     try {
       // Pastikan data bersih: ubah string kosong ke null untuk konsistensi database
@@ -52,16 +53,22 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
         due_date: adminInput.due_date === '' ? null : adminInput.due_date
       };
 
-      const newAdmin = await locationService.createAdministration({
-        ...cleanInput,
-        location_id: id
-      });
+      if (editingAdmin) {
+        const updatedAdmin = await locationService.updateAdministration(editingAdmin.id, cleanInput);
+        setAdministrations(prev => prev.map(a => a.id === updatedAdmin.id ? updatedAdmin : a));
+      } else {
+        const newAdmin = await locationService.createAdministration({
+          ...cleanInput,
+          location_id: id
+        });
+        setAdministrations(prev => [newAdmin, ...prev]);
+      }
       
-      setAdministrations(prev => [newAdmin, ...prev]);
       setShowAdminForm(false);
+      setEditingAdmin(null);
       Swal.fire({
         title: 'Berhasil!',
-        text: 'Data administrasi telah disimpan.',
+        text: `Data administrasi telah ${editingAdmin ? 'diperbarui' : 'disimpan'}.`,
         icon: 'success',
         timer: 1500,
         showConfirmButton: false
@@ -130,6 +137,7 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
               <img 
                 src={googleDriveService.getFileUrl(location.image_google_id)} 
                 alt={location.name}
+                referrerPolicy="no-referrer"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 flex items-center justify-center transition-all">
@@ -233,12 +241,23 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
           <div className="space-y-4">
             {administrations.map((admin) => (
               <div key={admin.id} className="bg-white border border-gray-100 rounded-md p-4 shadow-sm hover:shadow-md transition-shadow relative group">
-                <button 
-                  onClick={() => handleDeleteAdmin(admin.id)}
-                  className="absolute top-4 right-4 text-gray-300 hover:text-red-500 transition-colors"
-                >
-                  <Trash2 size={14} />
-                </button>
+                <div className="absolute top-4 right-4 flex gap-2">
+                  <button 
+                    onClick={() => {
+                      setEditingAdmin(admin);
+                      setShowAdminForm(true);
+                    }}
+                    className="text-gray-300 hover:text-[#006E62] transition-colors"
+                  >
+                    <Edit2 size={14} />
+                  </button>
+                  <button 
+                    onClick={() => handleDeleteAdmin(admin.id)}
+                    className="text-gray-300 hover:text-red-500 transition-colors"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-1">
                     <p className="text-[9px] font-bold uppercase tracking-widest text-gray-400">Tanggal</p>
@@ -301,6 +320,7 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
           <img 
             src={googleDriveService.getFileUrl(location.image_google_id).replace('=s1600', '=s0')} 
             alt={location.name}
+            referrerPolicy="no-referrer"
             className="max-w-full max-h-full object-contain rounded shadow-2xl"
           />
         </div>
@@ -309,8 +329,12 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
       {/* Modal Form Administrasi */}
       {showAdminForm && (
         <LocationAdminForm 
-          onClose={() => setShowAdminForm(false)}
-          onSubmit={handleAddAdmin}
+          initialData={editingAdmin}
+          onClose={() => {
+            setShowAdminForm(false);
+            setEditingAdmin(null);
+          }}
+          onSubmit={handleSaveAdmin}
         />
       )}
     </div>

@@ -97,6 +97,18 @@ export const locationService = {
     return data[0] as LocationAdministration;
   },
 
+  async updateAdministration(id: string, adminData: Partial<LocationAdminInput>) {
+    const sanitizedAdmin = sanitizePayload(adminData);
+    const { data, error } = await supabase
+      .from('location_administrations')
+      .update(sanitizedAdmin)
+      .eq('id', id)
+      .select();
+    
+    if (error) throw error;
+    return data[0] as LocationAdministration;
+  },
+
   async deleteAdministration(id: string) {
     const { error } = await supabase
       .from('location_administrations')
