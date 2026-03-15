@@ -21,7 +21,7 @@ const PengumumanMain: React.FC<PengumumanMainProps> = ({ user }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | undefined>(undefined);
 
-  const isAdmin = user.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.is_hr_admin || user?.is_performance_admin || user?.is_finance_admin;
 
   useEffect(() => {
     fetchAnnouncements();

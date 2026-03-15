@@ -15,7 +15,7 @@ const CompensationMain: React.FC = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   
   const user = authService.getCurrentUser();
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.is_finance_admin;
 
   const fetchCompensations = async () => {
     setLoading(true);

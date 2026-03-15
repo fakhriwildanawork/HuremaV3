@@ -14,7 +14,7 @@ const EmployeeOfThePeriodMain: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   
   const user = authService.getCurrentUser();
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.is_performance_admin;
 
   const fetchAwards = async () => {
     setLoading(true);

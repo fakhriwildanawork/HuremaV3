@@ -48,10 +48,13 @@ import { AuthUser } from './types';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const currentUser = authService.getCurrentUser();
+  const isAdminInitial = currentUser?.role === 'admin' || currentUser?.is_hr_admin || currentUser?.is_performance_admin || currentUser?.is_finance_admin;
+
   const [activeTab, setActiveTab] = useState<'dashboard' | 'location' | 'account' | 'schedule' | 'document' | 'settings' | 'presence' | 'overtime' | 'submission' | 'leave' | 'annual_leave' | 'permission' | 'maternity_leave' | 'master_app' | 'admin_settings' | 'kpi' | 'key_activity' | 'sales_report' | 'feedback' | 'lapor' | 'rapat' | 'pengumuman' | 'salary_scheme' | 'salary_adjustment' | 'payroll' | 'my_payslip' | 'reimbursement' | 'early_salary' | 'compensation' | 'employee_of_the_period' | 'dispensation' | 'admin_dispensation' | 'attendance_report' | 'finance_report' | 'employee_report' | 'daily_monitoring'>(
     (window.innerWidth < 768) 
       ? 'dashboard' 
-      : (authService.getCurrentUser()?.role === 'admin' ? 'master_app' : 'presence')
+      : (isAdminInitial ? 'master_app' : 'presence')
   );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -118,6 +121,8 @@ const App: React.FC = () => {
     );
   }
 
+  const isAdmin = user?.role === 'admin' || user?.is_hr_admin || user?.is_performance_admin || user?.is_finance_admin;
+
   const NavItemMobile = ({ id, icon: Icon, label, indent = false }: { id: any, icon: any, label: string, indent?: boolean }) => (
     <button
       onClick={() => { setActiveTab(id); setIsMobileMenuOpen(false); }}
@@ -133,7 +138,7 @@ const App: React.FC = () => {
   );
 
   // Mobile Non-Admin Layout
-  if (isMobile && user.role !== 'admin') {
+  if (isMobile && !isAdmin) {
     return (
       <MobileLayout activeTab={activeTab} setActiveTab={setActiveTab} user={user}>
         <Suspense fallback={
@@ -207,7 +212,7 @@ const App: React.FC = () => {
           ) : activeTab === 'master_app' ? (
             <MasterMain />
           ) : activeTab === 'settings' ? (
-            user?.role === 'admin' ? <AdminSettingsModule /> : <AccountMain user={user} setUser={setUser} isSelfProfile={true} />
+            isAdmin ? <AdminSettingsModule /> : <AccountMain user={user} setUser={setUser} isSelfProfile={true} />
           ) : (
             <div className="flex flex-col items-center justify-center h-64 text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
               <p className="font-medium text-sm">Modul "{activeTab}" sedang dalam pengembangan.</p>
@@ -219,7 +224,7 @@ const App: React.FC = () => {
   }
 
   // Desktop Non-Admin Restriction
-  if (!isMobile && user.role !== 'admin') {
+  if (!isMobile && !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white p-4">
         <div className="text-center max-w-md animate-in fade-in zoom-in duration-500">
@@ -267,13 +272,13 @@ const App: React.FC = () => {
             <button onClick={() => setIsMobileMenuOpen(false)}><X size={24} className="text-gray-400" /></button>
           </div>
           <nav className="flex-1 space-y-1 overflow-y-auto scrollbar-none">
-            {user?.role !== 'admin' && <NavItemMobile id="dashboard" icon={LayoutDashboard} label="Beranda" />}
+            {!isAdmin && <NavItemMobile id="dashboard" icon={LayoutDashboard} label="Beranda" />}
             
             <div className="flex items-center gap-3 px-4 py-3 text-gray-400 mt-2">
               <Database size={20} />
-              <span className="font-bold text-[10px] uppercase tracking-widest">{user?.role === 'admin' ? 'Dashboard Admin' : 'Master'}</span>
+              <span className="font-bold text-[10px] uppercase tracking-widest">{isAdmin ? 'Dashboard Admin' : 'Master'}</span>
             </div>
-            {user?.role !== 'admin' ? (
+            {!isAdmin ? (
               <>
                 <NavItemMobile id="master_app" icon={Database} label="Master Aplikasi" indent />
                 <NavItemMobile id="location" icon={MapPin} label="Data Lokasi" indent />
@@ -283,38 +288,38 @@ const App: React.FC = () => {
             ) : null}
 
             <div className="mt-4">
-              {user?.role !== 'admin' && (
+              {!isAdmin && (
                 <>
                   <NavItemMobile id="presence" icon={Fingerprint} label="Presensi Reguler" />
                   <NavItemMobile id="overtime" icon={Timer} label="Presensi Lembur" />
                 </>
               )}
-              <NavItemMobile id="kpi" icon={Target} label={user?.role === 'admin' ? 'KPI' : 'KPI Performance'} />
+              <NavItemMobile id="kpi" icon={Target} label={isAdmin ? 'KPI' : 'KPI Performance'} />
               <NavItemMobile id="key_activity" icon={CheckSquare} label="Key Activities" />
-              <NavItemMobile id="employee_of_the_period" icon={Trophy} label={user?.role === 'admin' ? 'Employee of The Month' : 'Employee of The Period'} />
-              <NavItemMobile id="sales_report" icon={MapPin} label={user?.role === 'admin' ? 'Sales report' : 'Sales Report'} />
+              <NavItemMobile id="employee_of_the_period" icon={Trophy} label={isAdmin ? 'Employee of The Month' : 'Employee of The Period'} />
+              <NavItemMobile id="sales_report" icon={MapPin} label={isAdmin ? 'Sales report' : 'Sales Report'} />
               <NavItemMobile id="feedback" icon={ClipboardList} label="Feedback Pegawai" />
-              <NavItemMobile id="lapor" icon={AlertTriangle} label={user?.role === 'admin' ? 'Laporan Pelanggaran' : 'Lapor Pelanggaran'} />
-              {user?.role !== 'admin' && <NavItemMobile id="rapat" icon={Video} label="Notulensi Rapat" />}
+              <NavItemMobile id="lapor" icon={AlertTriangle} label={isAdmin ? 'Laporan Pelanggaran' : 'Lapor Pelanggaran'} />
+              {!isAdmin && <NavItemMobile id="rapat" icon={Video} label="Notulensi Rapat" />}
               <NavItemMobile id="pengumuman" icon={Megaphone} label="Pengumuman" />
 
-              {user?.role !== 'admin' && (
+              {!isAdmin && (
                 <div className="flex items-center gap-3 px-4 py-3 text-gray-400 mt-2">
                   <Receipt size={20} />
                   <span className="font-bold text-[10px] uppercase tracking-widest">Finance</span>
                 </div>
               )}
-              {user?.role !== 'admin' && <NavItemMobile id="salary_scheme" icon={Receipt} label="Master Skema Gaji" indent />}
-              {user?.role === 'admin' && false && (
+              {!isAdmin && <NavItemMobile id="salary_scheme" icon={Receipt} label="Master Skema Gaji" indent />}
+              {isAdmin && false && (
                 <NavItemMobile id="salary_adjustment" icon={Receipt} label="Kustom Gaji" indent />
               )}
-              <NavItemMobile id="reimbursement" icon={Receipt} label="Reimburse" indent={user?.role !== 'admin'} />
-              <NavItemMobile id="early_salary" icon={Receipt} label="Ambil Gaji Awal" indent={user?.role !== 'admin'} />
-              {user?.role === 'admin' && (
+              <NavItemMobile id="reimbursement" icon={Receipt} label="Reimburse" indent={!isAdmin} />
+              <NavItemMobile id="early_salary" icon={Receipt} label="Ambil Gaji Awal" indent={!isAdmin} />
+              {isAdmin && (
                 <NavItemMobile id="compensation" icon={Receipt} label="Kompensasi" indent={false} />
               )}
 
-              {user?.role !== 'admin' && (
+              {!isAdmin && (
                 <>
                   <NavItemMobile id="leave" icon={Plane} label="Libur Mandiri" />
                   <NavItemMobile id="annual_leave" icon={Calendar} label="Cuti Tahunan" />
@@ -324,18 +329,18 @@ const App: React.FC = () => {
                   )}
                 </>
               )}
-              {(user?.role === 'admin' || user?.is_hr_admin) && (
+              {(isAdmin || user?.is_hr_admin) && (
                 <NavItemMobile id="daily_monitoring" icon={Activity} label="Pemantauan Harian" />
               )}
-              {user?.role === 'admin' && (
+              {isAdmin && (
                 <NavItemMobile id="admin_dispensation" icon={ClipboardCheck} label="Dispensasi sisi admin" />
               )}
               <NavItemMobile id="submission" icon={ClipboardCheck} label="Pengajuan" />
-              {user?.role !== 'admin' && <NavItemMobile id="document" icon={Files} label="Dokumen Digital" />}
-              {user?.role !== 'admin' && <NavItemMobile id="employee_report" icon={BarChart3} label="Laporan Karyawan" />}
+              {!isAdmin && <NavItemMobile id="document" icon={Files} label="Dokumen Digital" />}
+              {!isAdmin && <NavItemMobile id="employee_report" icon={BarChart3} label="Laporan Karyawan" />}
               <NavItemMobile id="attendance_report" icon={BarChart3} label="Laporan Kehadiran" />
               <NavItemMobile id="finance_report" icon={Wallet} label="Laporan Finance" />
-              {user?.role !== 'admin' && <NavItemMobile id="settings" icon={Settings} label="Pengaturan" />}
+              {!isAdmin && <NavItemMobile id="settings" icon={Settings} label="Pengaturan" />}
             </div>
           </nav>
         </div>

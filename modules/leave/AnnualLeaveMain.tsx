@@ -21,7 +21,7 @@ const AnnualLeaveMain: React.FC = () => {
   const [account, setAccount] = useState<Account | null>(null);
   const [usedDays, setUsedDays] = useState(0);
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.is_hr_admin || user?.is_performance_admin || user?.is_finance_admin;
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
@@ -34,7 +34,7 @@ const AnnualLeaveMain: React.FC = () => {
     try {
       setIsLoading(true);
       const [leaveData, accountData, used] = await Promise.all([
-        currentUser.role === 'admin' 
+        isAdmin 
           ? leaveService.getAllAnnual() 
           : leaveService.getAnnualByAccountId(currentUser.id),
         accountService.getById(currentUser.id),

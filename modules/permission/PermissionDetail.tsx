@@ -21,7 +21,7 @@ const PermissionDetail: React.FC<PermissionDetailProps> = ({ request, user, onCl
     reason: ''
   });
 
-  const isAdmin = user.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.is_hr_admin || user?.is_performance_admin || user?.is_finance_admin;
   const isMyTurn = request.current_negotiator_role === (isAdmin ? 'admin' : 'user');
   const isClosed = ['approved', 'rejected', 'cancelled'].includes(request.status);
 

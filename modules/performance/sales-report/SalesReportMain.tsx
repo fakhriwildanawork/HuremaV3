@@ -23,12 +23,12 @@ const SalesReportMain: React.FC = () => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [activeTab, setActiveTab] = useState<'today' | 'history' | 'all'>('today');
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.is_performance_admin;
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
     setUser(currentUser);
-    if (currentUser?.role === 'admin') {
+    if (currentUser?.role === 'admin' || currentUser?.is_performance_admin) {
       setActiveTab('all');
     }
     fetchData(currentUser);
@@ -38,7 +38,7 @@ const SalesReportMain: React.FC = () => {
     if (!currentUser) return;
     try {
       setIsLoading(true);
-      const reportsData = currentUser.role === 'admin' 
+      const reportsData = (currentUser.role === 'admin' || currentUser.is_performance_admin)
         ? await salesReportService.getAll() 
         : await salesReportService.getByAccountId(currentUser.id);
       setReports(reportsData);

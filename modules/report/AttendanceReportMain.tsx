@@ -59,7 +59,7 @@ const AttendanceReportMain: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const user = authService.getCurrentUser();
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.is_hr_admin || user?.is_performance_admin || user?.is_finance_admin;
 
   useEffect(() => {
     fetchReport();

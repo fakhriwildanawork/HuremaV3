@@ -67,7 +67,7 @@ const MobileDashboard: React.FC<MobileDashboardProps> = ({ user, setActiveTab })
   const [viewMode, setViewMode] = useState<'user' | 'admin'>('user');
   const isAdmin = user.role === 'admin' || user.is_hr_admin || user.is_performance_admin || user.is_finance_admin;
 
-  const menuItems = user.role === 'admin' ? [
+  const menuItems = isAdmin ? [
     { id: 'kpi', label: 'Key Performance Indicator', icon: Target, color: 'bg-purple-50 text-purple-600' },
     { id: 'key_activity', label: 'Key Activities', icon: CheckSquare, color: 'bg-teal-50 text-teal-600' },
     { id: 'sales_report', label: 'Sales Report', icon: MapPin, color: 'bg-cyan-50 text-cyan-600' },

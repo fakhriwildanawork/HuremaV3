@@ -22,6 +22,7 @@ const RapatMain: React.FC = () => {
   const [showSession, setShowSession] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [user, setUser] = useState<AuthUser | null>(null);
+  const isAdmin = user?.role === 'admin' || user?.is_hr_admin || user?.is_performance_admin || user?.is_finance_admin;
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
@@ -152,7 +153,7 @@ const RapatMain: React.FC = () => {
   });
 
   const canManageSession = (meeting: Meeting) => {
-    return user && (meeting.notulen_ids.includes(user.id) || user.role === 'admin');
+    return user && (meeting.notulen_ids.includes(user.id) || isAdmin);
   };
 
   return (
@@ -232,7 +233,7 @@ const RapatMain: React.FC = () => {
                       <Play size={14} />
                     </button>
                   ) : null}
-                  {(user?.role === 'admin' || meeting.created_by === user?.id) && (
+                  {(isAdmin || meeting.created_by === user?.id) && (
                     <button 
                       onClick={() => handleDelete(meeting.id)}
                       className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"

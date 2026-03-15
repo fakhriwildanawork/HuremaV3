@@ -21,7 +21,7 @@ const DocumentMain: React.FC<DocumentMainProps> = ({ user }) => {
   const [showForm, setShowForm] = useState(false);
   const [editingDoc, setEditingDoc] = useState<DigitalDocument | null>(null);
 
-  const isAdmin = user?.role === 'admin' || user?.is_hr_admin;
+  const isAdmin = user?.role === 'admin' || user?.is_hr_admin || user?.is_performance_admin || user?.is_finance_admin;
 
   useEffect(() => {
     fetchDocuments();

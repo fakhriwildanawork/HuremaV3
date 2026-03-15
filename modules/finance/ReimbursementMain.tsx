@@ -16,7 +16,7 @@ const ReimbursementMain: React.FC = () => {
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
   
   const user = authService.getCurrentUser();
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.is_finance_admin;
 
   const fetchReimbursements = async () => {
     setLoading(true);

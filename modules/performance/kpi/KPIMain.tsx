@@ -23,7 +23,7 @@ const KPIMain: React.FC = () => {
   const [showDetail, setShowDetail] = useState(false);
   const [user, setUser] = useState<AuthUser | null>(null);
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.is_performance_admin;
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
@@ -35,7 +35,7 @@ const KPIMain: React.FC = () => {
     if (!currentUser) return;
     try {
       setIsLoading(true);
-      const data = currentUser.role === 'admin' 
+      const data = (currentUser.role === 'admin' || currentUser.is_performance_admin)
         ? await kpiService.getAll() 
         : await kpiService.getByAccountId(currentUser.id);
       

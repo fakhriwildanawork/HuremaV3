@@ -27,9 +27,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
   const [unreadCompensations, setUnreadCompensations] = useState(0);
   const [unreadDispensations, setUnreadDispensations] = useState(0);
   const user = authService.getCurrentUser();
+  const isAdmin = user?.role === 'admin' || user?.is_hr_admin || user?.is_performance_admin || user?.is_finance_admin;
 
   useEffect(() => {
-    if (user?.role === 'admin') {
+    if (isAdmin) {
       const fetchUnread = async () => {
         try {
           const [reimburseCount, compensationCount, dispensationCount] = await Promise.all([
@@ -117,10 +118,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
       </div>
       
       <nav className="flex-1 px-3 overflow-y-auto scrollbar-none">
-        {user?.role !== 'admin' && <NavItem id="dashboard" icon={LayoutDashboard} label="Beranda" />}
+        {!isAdmin && <NavItem id="dashboard" icon={LayoutDashboard} label="Beranda" />}
         
         {/* 1. Master Menu Group */}
-        {(user?.role === 'admin' || user?.is_hr_admin) && (
+        {(isAdmin || user?.is_hr_admin) && (
           <div className="mt-4">
             <button 
               onClick={() => setIsMasterOpen(!isMasterOpen)}
@@ -138,18 +139,18 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
             
             {(isMasterOpen || isCollapsed) && (
               <div className={`mt-1 overflow-hidden transition-all duration-300 ${isCollapsed ? '' : 'max-h-96'}`}>
-                {user?.role === 'admin' && <NavItem id="master_app" icon={Database} label="Master Aplikasi" indent />}
+                {isAdmin && <NavItem id="master_app" icon={Database} label="Master Aplikasi" indent />}
                 <NavItem id="location" icon={MapPin} label="Data Lokasi" indent />
                 <NavItem id="schedule" icon={CalendarClock} label="Manajemen Jadwal" indent />
                 <NavItem id="account" icon={Users} label="Akun" indent />
-                {user?.role === 'admin' && <NavItem id="admin_settings" icon={ShieldCheck} label="Pengaturan Admin" indent />}
+                {isAdmin && <NavItem id="admin_settings" icon={ShieldCheck} label="Pengaturan Admin" indent />}
               </div>
             )}
           </div>
         )}
 
         {/* 2. Pemantauan Harian */}
-        {(user?.role === 'admin' || user?.is_hr_admin) && (
+        {(isAdmin || user?.is_hr_admin) && (
           <NavItem id="daily_monitoring" icon={Activity} label="Pemantauan Harian" />
         )}
 
@@ -157,7 +158,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
         <NavItem id="submission" icon={ClipboardCheck} label="Pengajuan" />
 
         {/* 4. Performance Menu Group */}
-        {(user?.role === 'admin' || user?.is_performance_admin) && (
+        {(isAdmin || user?.is_performance_admin) && (
           <div className="mt-4">
             <button 
               onClick={() => setIsPerformanceOpen(!isPerformanceOpen)}
@@ -184,7 +185,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
         )}
 
         {/* 5. Finance Menu Group */}
-        {(user?.role === 'admin' || user?.is_finance_admin) && (
+        {(isAdmin || user?.is_finance_admin) && (
           <div className="mt-4">
             <button 
               onClick={() => setIsFinanceOpen(!isFinanceOpen)}
@@ -213,15 +214,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
             {(isFinanceOpen || isCollapsed) && (
               <div className={`mt-1 overflow-hidden transition-all duration-300 ${isCollapsed ? '' : 'max-h-96'}`}>
                 <NavItem id="salary_scheme" icon={Receipt} label="Skema Gaji" indent />
-                {(user?.role === 'admin' || user?.is_finance_admin) && (
+                {(isAdmin || user?.is_finance_admin) && (
                   <>
                     <NavItem id="salary_adjustment" icon={Receipt} label="Kustom Gaji" indent />
                     <NavItem id="payroll" icon={Receipt} label="Payroll" indent />
                   </>
                 )}
-                <NavItem id="reimbursement" icon={Receipt} label="Reimburse" indent badge={(user?.role === 'admin' || user?.is_finance_admin) ? unreadReimbursements : undefined} />
+                <NavItem id="reimbursement" icon={Receipt} label="Reimburse" indent badge={(isAdmin || user?.is_finance_admin) ? unreadReimbursements : undefined} />
                 <NavItem id="early_salary" icon={Receipt} label="Ambil Gaji Awal" indent />
-                {(user?.role === 'admin' || user?.is_finance_admin) && (
+                {(isAdmin || user?.is_finance_admin) && (
                   <NavItem id="compensation" icon={Receipt} label="Kompensasi" indent badge={unreadCompensations} />
                 )}
               </div>
@@ -240,12 +241,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
         <NavItem id="document" icon={Files} label="Dokumen Digital" />
 
         {/* 12. Antrean Dispensasi */}
-        {(user?.role === 'admin' || user?.is_hr_admin) && (
+        {(isAdmin || user?.is_hr_admin) && (
           <NavItem id="admin_dispensation" icon={ClipboardList} label="Antrean Dispensasi" badge={unreadDispensations} />
         )}
 
         {/* Laporan Menu Group */}
-        {(user?.role === 'admin' || user?.is_hr_admin || user?.is_finance_admin) && (
+        {(isAdmin || user?.is_hr_admin || user?.is_finance_admin) && (
           <div className="mt-4">
             <button 
               onClick={() => setIsReportOpen(!isReportOpen)}
@@ -263,13 +264,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
             
             {(isReportOpen || isCollapsed) && (
               <div className={`mt-1 overflow-hidden transition-all duration-300 ${isCollapsed ? '' : 'max-h-96'}`}>
-                {(user?.role === 'admin' || user?.is_hr_admin) && (
+                {(isAdmin || user?.is_hr_admin) && (
                   <>
                     <NavItem id="employee_report" icon={BarChart3} label="Laporan Karyawan" indent />
                     <NavItem id="attendance_report" icon={Fingerprint} label="Laporan Kehadiran" indent />
                   </>
                 )}
-                {(user?.role === 'admin' || user?.is_finance_admin) && (
+                {(isAdmin || user?.is_finance_admin) && (
                   <NavItem id="finance_report" icon={Wallet} label="Laporan Finance" indent />
                 )}
               </div>
@@ -278,7 +279,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
         )}
 
         {/* Presensi Group for non-admin */}
-        {user?.role !== 'admin' && (
+        {!isAdmin && (
           <div className="mt-4">
             <button 
               onClick={() => setIsPresenceOpen(!isPresenceOpen)}
@@ -307,7 +308,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
         )}
 
         <div className="mt-4">
-          {user?.role !== 'admin' && (
+          {!isAdmin && (
             <>
               <NavItem id="leave" icon={Plane} label="Libur Mandiri" />
               <NavItem id="annual_leave" icon={Calendar} label="Cuti Tahunan" />

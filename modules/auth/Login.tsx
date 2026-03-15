@@ -24,7 +24,8 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       const user = await authService.login(accessCode, password);
       
       // Check for desktop access restriction
-      if (window.innerWidth >= 768 && user.role !== 'admin') {
+      const isAdmin = user.role === 'admin' || user.is_hr_admin || user.is_performance_admin || user.is_finance_admin;
+      if (window.innerWidth >= 768 && !isAdmin) {
         authService.logout(); // Clear session if it was set
         throw new Error('Akses Desktop hanya untuk Admin. Silakan gunakan aplikasi mobile.');
       }

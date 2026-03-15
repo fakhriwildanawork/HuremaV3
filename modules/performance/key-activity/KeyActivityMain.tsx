@@ -27,12 +27,12 @@ const KeyActivityMain: React.FC = () => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [activeTab, setActiveTab] = useState<'today' | 'backlog' | 'history' | 'all' | 'verify'>('today');
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.is_performance_admin;
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
     setUser(currentUser);
-    if (currentUser?.role === 'admin') {
+    if (currentUser?.role === 'admin' || currentUser?.is_performance_admin) {
       setActiveTab('all');
     }
     fetchData(currentUser);
@@ -43,8 +43,8 @@ const KeyActivityMain: React.FC = () => {
     try {
       setIsLoading(true);
       const [activitiesData, reportsData] = await Promise.all([
-        currentUser.role === 'admin' ? keyActivityService.getAll() : keyActivityService.getByAccountId(currentUser.id),
-        currentUser.role === 'admin' ? keyActivityService.getAllReports() : keyActivityService.getReportsByAccount(currentUser.id)
+        (currentUser.role === 'admin' || currentUser.is_performance_admin) ? keyActivityService.getAll() : keyActivityService.getByAccountId(currentUser.id),
+        (currentUser.role === 'admin' || currentUser.is_performance_admin) ? keyActivityService.getAllReports() : keyActivityService.getReportsByAccount(currentUser.id)
       ]);
       setActivities(activitiesData);
       setReports(reportsData);

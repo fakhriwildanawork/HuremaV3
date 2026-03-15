@@ -20,7 +20,7 @@ const FeedbackMain: React.FC = () => {
   const [showDetail, setShowDetail] = useState(false);
   const [user, setUser] = useState<AuthUser | null>(null);
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.is_hr_admin || user?.is_performance_admin || user?.is_finance_admin;
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
@@ -30,9 +30,10 @@ const FeedbackMain: React.FC = () => {
 
   const fetchData = async (currentUser: AuthUser | null) => {
     if (!currentUser) return;
+    const isUserAdmin = currentUser.role === 'admin' || currentUser.is_hr_admin || currentUser.is_performance_admin || currentUser.is_finance_admin;
     try {
       setIsLoading(true);
-      const data = currentUser.role === 'admin' 
+      const data = isUserAdmin 
         ? await feedbackService.getAll() 
         : await feedbackService.getByAccountId(currentUser.id);
       setFeedbacks(data);
