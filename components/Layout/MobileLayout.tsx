@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { Bell, Home, Fingerprint, UserCircle } from 'lucide-react';
+import { Bell, Home, Fingerprint, UserCircle, Menu } from 'lucide-react';
 import { AuthUser } from '../../types';
+import { googleDriveService } from '../../services/googleDriveService';
 
 interface MobileLayoutProps {
   children: React.ReactNode;
@@ -14,15 +15,26 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children, activeTab, setAct
   return (
     <div className="min-h-screen bg-white flex flex-col md:hidden">
       {/* Top Header */}
-      <header className="h-16 flex items-center justify-between px-6 bg-white sticky top-0 z-40 border-b border-gray-50">
+      <header className="h-16 flex items-center justify-between px-4 bg-white sticky top-0 z-40 border-b border-gray-50">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#006E62] rounded-lg flex items-center justify-center text-white font-bold italic text-sm">H</div>
-          <h1 className="text-lg font-bold text-[#006E62] tracking-tight">HUREMA</h1>
+          <div className="w-8 h-8 bg-[#006E62] rounded-lg flex items-center justify-center text-white font-bold italic text-sm shadow-sm">H</div>
         </div>
-        <button className="p-2 text-gray-400 hover:text-[#006E62] transition-colors relative">
-          <Bell size={22} />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
-        </button>
+        
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-semibold text-gray-700 truncate max-w-[120px]">{user.full_name}</span>
+          <div className="w-9 h-9 rounded-full bg-emerald-50 border border-emerald-100 overflow-hidden flex items-center justify-center text-[#006E62] font-bold shadow-sm">
+            {user.photo_google_id ? (
+              <img 
+                src={googleDriveService.getFileUrl(user.photo_google_id)} 
+                alt="" 
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <UserCircle size={22} />
+            )}
+          </div>
+        </div>
       </header>
 
       {/* Main Content Area */}
