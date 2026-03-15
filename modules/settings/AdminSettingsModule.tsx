@@ -82,10 +82,21 @@ const AdminSettingsModule: React.FC = () => {
     }
   };
 
-  const filteredAccounts = accounts.filter(acc => 
-    acc.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    acc.internal_nik.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const getSortedAccounts = (adminIds: string[]) => {
+    return accounts
+      .filter(acc => acc.full_name !== 'Superadmin')
+      .filter(acc => 
+        acc.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        acc.internal_nik.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => {
+        const aSelected = adminIds.includes(a.id);
+        const bSelected = adminIds.includes(b.id);
+        if (aSelected && !bSelected) return -1;
+        if (!aSelected && bSelected) return 1;
+        return 0;
+      });
+  };
 
   if (loading) {
     return (
@@ -143,7 +154,7 @@ const AdminSettingsModule: React.FC = () => {
             </div>
           </div>
           <div className="flex-1 overflow-y-auto max-h-[400px] p-2 space-y-1 scrollbar-thin">
-            {filteredAccounts.map(acc => (
+            {getSortedAccounts(hrAdmins).map(acc => (
               <button
                 key={acc.id}
                 onClick={() => toggleAdmin(acc.id, 'hr')}
@@ -197,7 +208,7 @@ const AdminSettingsModule: React.FC = () => {
             </div>
           </div>
           <div className="flex-1 overflow-y-auto max-h-[400px] p-2 space-y-1 scrollbar-thin">
-            {filteredAccounts.map(acc => (
+            {getSortedAccounts(performanceAdmins).map(acc => (
               <button
                 key={acc.id}
                 onClick={() => toggleAdmin(acc.id, 'performance')}
@@ -251,7 +262,7 @@ const AdminSettingsModule: React.FC = () => {
             </div>
           </div>
           <div className="flex-1 overflow-y-auto max-h-[400px] p-2 space-y-1 scrollbar-thin">
-            {filteredAccounts.map(acc => (
+            {getSortedAccounts(financeAdmins).map(acc => (
               <button
                 key={acc.id}
                 onClick={() => toggleAdmin(acc.id, 'finance')}
