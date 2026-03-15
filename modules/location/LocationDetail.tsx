@@ -22,7 +22,6 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
   const [isSaving, setIsSaving] = useState(false);
   const [showAdminForm, setShowAdminForm] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState<LocationAdministration | null>(null);
-  const [showFullImage, setShowFullImage] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -121,31 +120,8 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
     <div className="bg-white rounded-md shadow-sm border border-gray-100 overflow-hidden flex flex-col md:flex-row gap-8 p-6 md:p-8">
       {isSaving && <LoadingSpinner />}
       
-      {/* Kolom Kiri: Info Utama & Gambar */}
+      {/* Info Utama */}
       <div className="w-full md:w-1/3 space-y-6">
-        <div 
-          className="relative h-64 bg-gray-50 rounded-md overflow-hidden border border-gray-100 cursor-pointer group"
-          onClick={() => setShowFullImage(true)}
-        >
-          {location.image_google_id ? (
-            <>
-              <img 
-                src={googleDriveService.getFileUrl(location.image_google_id)} 
-                alt={location.name}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 flex items-center justify-center transition-all">
-                <ExternalLink className="text-white opacity-0 group-hover:opacity-100" size={24} />
-              </div>
-            </>
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
-              <ImageIcon size={48} strokeWidth={1} />
-              <span className="text-[10px] uppercase font-bold tracking-widest mt-2">Gambar Tidak Tersedia</span>
-            </div>
-          )}
-        </div>
-
         <div className="space-y-4">
           <div className="flex justify-between items-start">
             <div>
@@ -292,23 +268,6 @@ const LocationDetail: React.FC<LocationDetailProps> = ({ id, onClose, onEdit, on
           </div>
         )}
       </div>
-
-      {/* Modal Gambar Full Size */}
-      {showFullImage && location.image_google_id && (
-        <div 
-          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 md:p-12"
-          onClick={() => setShowFullImage(false)}
-        >
-          <button className="absolute top-6 right-6 text-white hover:rotate-90 transition-transform duration-300">
-            <X size={32} />
-          </button>
-          <img 
-            src={googleDriveService.getFileUrl(location.image_google_id)} 
-            alt={location.name}
-            className="max-w-full max-h-full object-contain rounded shadow-2xl"
-          />
-        </div>
-      )}
 
       {/* Modal Form Administrasi */}
       {showAdminForm && (

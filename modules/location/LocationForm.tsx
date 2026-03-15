@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Upload, Save, MapPin, Navigation } from 'lucide-react';
+import { X, Save, MapPin, Navigation, AlertCircle } from 'lucide-react';
+import Swal from 'sweetalert2';
 import { LocationInput } from '../../types';
 import { googleDriveService } from '../../services/googleDriveService';
 
@@ -28,18 +29,8 @@ const LocationForm: React.FC<LocationFormProps> = ({ onClose, onSubmit, initialD
     image_google_id: initialData?.image_google_id || '',
   });
 
-  const [uploading, setUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const mapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
-
-  useEffect(() => {
-    return () => {
-      if (previewUrl && previewUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
 
   useEffect(() => {
     const defaultLat = formData.latitude || -6.200000;
@@ -121,31 +112,38 @@ const LocationForm: React.FC<LocationFormProps> = ({ onClose, onSubmit, initialD
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const localUrl = URL.createObjectURL(file);
-    setPreviewUrl(localUrl);
-
-    try {
-      setUploading(true);
-      await new Promise(resolve => setTimeout(resolve, 400));
-      const fileId = await googleDriveService.uploadFile(file);
-      setFormData(prev => ({ ...prev, image_google_id: fileId }));
-    } catch (error) {
-      console.error(error);
-      setPreviewUrl(null);
-      alert('Gagal mengunggah gambar');
-    } finally {
-      setUploading(false);
-    }
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validasi Kolom Wajib
+    if (
+      !formData.name.trim() || 
+      !formData.location_type || 
+      !formData.address.trim() || 
+      !formData.city.trim() || 
+      !formData.province.trim() || 
+      !formData.radius ||
+      !formData.latitude ||
+      !formData.longitude
+    ) {
+      Swal.fire({
+        title: 'Data Belum Lengkap',
+        text: 'Mohon lengkapi Jenis, Nama, Map, Alamat, Kota, Provinsi, dan Radius sebelum menyimpan.',
+        icon: 'warning',
+        confirmButtonColor: '#006E62'
+      });
+      return;
+    }
+
     onSubmit(formData);
   };
+
+  const Label = ({ children, required = false }: { children: React.ReactNode, required?: boolean }) => (
+    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
+      {children}
+      {required && <span className="text-red-500">*</span>}
+    </label>
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
@@ -160,9 +158,14 @@ const LocationForm: React.FC<LocationFormProps> = ({ onClose, onSubmit, initialD
         </div>
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
+          <div className="bg-orange-50/50 border border-orange-100 p-2 rounded mb-4 flex items-center gap-2">
+            <AlertCircle size={14} className="text-orange-400 shrink-0" />
+            <p className="text-[10px] text-orange-600 font-medium">Kolom bertanda <span className="text-red-500 font-bold">*</span> wajib diisi agar data lokasi dapat disimpan.</p>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Jenis Lokasi</label>
+              <Label required>Jenis Lokasi</Label>
               <select
                 name="location_type"
                 value={formData.location_type}
@@ -177,7 +180,7 @@ const LocationForm: React.FC<LocationFormProps> = ({ onClose, onSubmit, initialD
               </select>
             </div>
             <div className="md:col-span-2 space-y-1">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Nama Lokasi</label>
+              <Label required>Nama Lokasi</Label>
               <input
                 required
                 name="name"
@@ -191,7 +194,7 @@ const LocationForm: React.FC<LocationFormProps> = ({ onClose, onSubmit, initialD
 
           <div className="space-y-1">
             <div className="flex items-center justify-between mb-1">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Peta Geotag</label>
+              <Label required>Peta Geotag (Map)</Label>
               <button 
                 type="button"
                 onClick={detectGPS}
@@ -209,7 +212,7 @@ const LocationForm: React.FC<LocationFormProps> = ({ onClose, onSubmit, initialD
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div className="md:col-span-3 space-y-1">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Alamat Lengkap</label>
+              <Label required>Alamat Lengkap</Label>
               <input
                 required
                 name="address"
@@ -219,7 +222,7 @@ const LocationForm: React.FC<LocationFormProps> = ({ onClose, onSubmit, initialD
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Kota</label>
+              <Label required>Kota</Label>
               <input
                 required
                 name="city"
@@ -232,7 +235,7 @@ const LocationForm: React.FC<LocationFormProps> = ({ onClose, onSubmit, initialD
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Provinsi</label>
+              <Label required>Provinsi</Label>
               <input
                 name="province"
                 value={formData.province}
@@ -259,7 +262,7 @@ const LocationForm: React.FC<LocationFormProps> = ({ onClose, onSubmit, initialD
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Radius (m)</label>
+              <Label required>Radius (m)</Label>
               <input
                 type="number"
                 name="radius"
@@ -267,42 +270,6 @@ const LocationForm: React.FC<LocationFormProps> = ({ onClose, onSubmit, initialD
                 onChange={handleChange}
                 className="w-full px-2 py-1.5 text-[13px] border border-gray-200 rounded focus:ring-1 focus:ring-[#006E62] focus:border-[#006E62] outline-none"
               />
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Foto Lokasi (Google Drive)</label>
-            <div className="flex items-center gap-4 p-2 border border-gray-100 rounded-md bg-gray-50">
-              {previewUrl || formData.image_google_id ? (
-                <div className="w-16 h-16 rounded border border-gray-200 overflow-hidden relative group shrink-0">
-                  <img 
-                    src={previewUrl || googleDriveService.getFileUrl(formData.image_google_id!)} 
-                    alt="Preview" 
-                    className={`w-full h-full object-cover ${uploading ? 'opacity-40 animate-pulse' : ''}`}
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                    <label className="cursor-pointer text-white p-2">
-                      <Upload size={14} />
-                      <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} disabled={uploading} />
-                    </label>
-                  </div>
-                  {uploading && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-4 h-4 border-2 border-[#006E62] border-t-transparent rounded-full animate-spin"></div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <label className={`w-16 h-16 border-2 border-dashed border-gray-300 rounded flex flex-col items-center justify-center cursor-pointer hover:border-[#006E62] hover:bg-white transition-all shrink-0 ${uploading ? 'animate-pulse' : ''}`}>
-                  <Upload className="text-gray-400 mb-1" size={14} />
-                  <span className="text-[8px] text-gray-400 font-bold uppercase tracking-tighter">{uploading ? 'UPLOADING' : 'UPLOAD'}</span>
-                  <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} disabled={uploading} />
-                </label>
-              )}
-              <div className="flex-1">
-                <p className="text-[11px] text-gray-600 font-medium">Gambar Lokasi</p>
-                <p className="text-[9px] text-gray-400 italic">ID GDrive: {formData.image_google_id || 'Belum diunggah'}</p>
-              </div>
             </div>
           </div>
         </form>
@@ -313,8 +280,7 @@ const LocationForm: React.FC<LocationFormProps> = ({ onClose, onSubmit, initialD
           </button>
           <button
             onClick={handleSubmit}
-            disabled={uploading}
-            className={`flex items-center gap-2 bg-[#006E62] text-white px-6 py-2 rounded-md hover:bg-[#005a50] transition-colors shadow-md text-xs font-bold uppercase ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className="flex items-center gap-2 bg-[#006E62] text-white px-6 py-2 rounded-md hover:bg-[#005a50] transition-colors shadow-md text-xs font-bold uppercase"
           >
             <Save size={14} /> Simpan Data
           </button>
